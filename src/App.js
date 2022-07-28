@@ -1,23 +1,103 @@
-import logo from './logo.svg';
+
+
+import { createUserWithEmailAndPassword, onAuthStateChanged, signInWithEmailAndPassword, signOut, } from 'firebase/auth';
+import { useState } from 'react';
 import './App.css';
+import { auth } from './Firebase/Firebase-Config';
+
 
 function App() {
+  const [regEmail, setRegEmail] = useState("")
+  const [regPassword, setRegPassword] = useState("")
+  const [logEmail, setLogEmail] = useState("")
+  const [logPassword, setLogPassword] = useState("")
+  const [loguser, setLoguser] = useState({})
+
+ console.log(process.env)
+  onAuthStateChanged(auth, (currentUser) => {            //====================================== //user state
+    if (currentUser) {
+      console.log("logged in")
+      setLoguser(currentUser)
+      console.log(loguser)
+    } else {
+      console.log("not logged")
+    }
+  })
+
+
+  const register = () => {                                    //================================//create user with email
+
+    console.log(regEmail, regPassword)
+    createUserWithEmailAndPassword(auth, regEmail, regPassword)
+      .then((userCredintial) => {
+        //login
+        const user = userCredintial.user
+        console.log(user.email)
+      }).catch((error) => {
+        const errorMessage = error.message;
+        console.log(errorMessage)
+      })
+  }
+
+  const login = () => {                                          //=============================================//sign in
+    signInWithEmailAndPassword(auth, logEmail, logPassword)         
+      .then((userCredintial) => {
+        const lguser = userCredintial.user
+        console.log(lguser.email)
+      })
+  }
+
+
+  const logout = () => {             //==================================//log out
+    signOut(auth).then(() => {
+      console.log("sign out")
+    }).catch((error) => {
+      const errorMessage = error.message;
+      console.log(errorMessage)
+    })
+
+  }
+
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div>
+        <h1>
+          create accout
+        </h1>
+        <input type="email"
+          placeholder='email'
+          onChange={(e) => setRegEmail(e.target.value)}
+        />
+
+        <input type="password"
+          placeholder='password'
+          onChange={(e) => setRegPassword(e.target.value)}
+        />
+
+        <button onClick={register}> register</button>
+      </div>
+      <div>
+        <h1>
+          login
+        </h1>
+        <input type="email"
+          placeholder='email'
+          onChange={(e) => setLogEmail(e.target.value)}
+        />
+
+        <input type="password"
+          placeholder='password'
+          onChange={(e) => setLogPassword(e.target.value)}
+        />
+
+        <button onClick={login}>singnin</button>
+
+
+      </div>
+      <h4> user logged in :{loguser.email}</h4>
+      <button onClick={logout}> logout</button>
+
     </div>
   );
 }
